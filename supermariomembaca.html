@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Misi Membaca: Portal Pembelajaran Interaktif</title>
+    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sky-blue: #87CEEB;
+            --grass-green: #4CAF50;
+            --dirt-brown: #8B4513;
+            --sun-yellow: #FFD700;
+            --danger-red: #ff4757;
+            --ui-white: rgba(255, 255, 255, 0.9);
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #1a1a1a;
+            font-family: 'Fredoka', sans-serif;
+            user-select: none;
+            touch-action: none;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Container responsif */
+        #game-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+        }
+
+        canvas {
+            background-color: var(--sky-blue);
+            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
+            max-width: 100%;
+            max-height: 100%;
+            aspect-ratio: 16/9;
+            border-radius: 8px;
+            image-rendering: pixelated; /* Memberikan rasa game retro */
+        }
+
+        /* Overlays */
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background: rgba(0,0,0,0.85);
+            color: white;
+            z-index: 100;
+            text-align: center;
+            backdrop-filter: blur(8px);
+            padding: 20px;
+        }
+
+        .hidden { display: none !important; }
+
+        .btn {
+            background: linear-gradient(to bottom, #ff9800, #f57c00);
+            border: none;
+            padding: 18px 45px;
+            color: white;
+            font-size: clamp(20px, 4vw, 28px);
+            font-weight: bold;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 6px 0 #e68a00, 0 10px 20px rgba(0,0,0,0.3);
+            margin: 15px;
+            font-family: 'Comfortaa', cursive;
+            transition: all 0.1s ease;
+        }
+
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #e68a00;
+        }
+
+        /* Modal Perkataan */
+        #word-modal {
+            background: white;
+            color: #333;
+            padding: clamp(20px, 5vw, 40px);
+            border-radius: 30px;
+            border: 8px solid var(--sun-yellow);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        }
+
+        .word-list {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: clamp(10px, 2vw, 20px);
+            margin: 25px 0;
+        }
+
+        .word-item {
+            background: #e3f2fd;
+            padding: clamp(10px, 3vw, 20px) clamp(20px, 5vw, 40px);
+            border-radius: 20px;
+            font-size: clamp(30px, 8vw, 50px);
+            font-weight: bold;
+            color: #1565c0;
+            border: 4px solid #bbdefb;
+            animation: wordBounce 2s infinite ease-in-out;
+        }
+
+        @keyframes wordBounce {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-10px) scale(1.05); }
+        }
+
+        /* Heads Up Display (HUD) */
+        #hud {
+            position: absolute;
+            top: 15px;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 20px;
+            z-index: 10;
+            pointer-events: none;
+        }
+
+        .badge {
+            background: var(--ui-white);
+            color: #333;
+            padding: 8px 20px;
+            border-radius: 15px;
+            font-size: clamp(16px, 3vw, 22px);
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            border: 2px solid var(--sun-yellow);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Controls */
+        #controls {
+            position: absolute;
+            bottom: clamp(15px, 4vw, 30px);
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            padding: 0 clamp(15px, 5vw, 50px);
+            pointer-events: none;
+            z-index: 20;
+        }
+
+        .control-group { display: flex; gap: clamp(10px, 3vw, 25px); pointer-events: auto; }
+
+        .ctrl-btn {
+            width: clamp(70px, 15vw, 95px);
+            height: clamp(70px, 15vw, 95px);
+            background: rgba(255, 255, 255, 0.25);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(30px, 8vw, 45px);
+            color: white;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(5px);
+            cursor: pointer;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
+        }
+
+        .ctrl-btn:active { background: rgba(255, 255, 255, 0.5); transform: scale(0.95); }
+
+        #mute-btn {
+            pointer-events: auto;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: var(--ui-white);
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-wrapper">
+    <!-- UI Layer -->
+    <div id="hud">
+        <div class="badge">Aras: <span id="lvl-num">1</span></div>
+        <button id="mute-btn" onclick="toggleMute()">🔊</button>
+        <div class="badge">Nyawa: <span id="lives-display">❤️❤️❤️❤️❤️</span></div>
+    </div>
+    
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Menu -->
+    <div id="menu-screen" class="overlay">
+        <div style="background: white; padding: 40px; border-radius: 30px; border: 8px solid var(--sun-yellow); color: #333;">
+            <h1 style="font-size: clamp(40px, 10vw, 70px); color: #e67e22; margin: 0; text-shadow: 2px 2px 0 #f39c12;">MISI MEMBACA</h1>
+            <p style="font-size: clamp(18px, 4vw, 24px); margin: 15px 0 30px;">Kumpul ilmu, elak bahaya, dan jadilah juara!</p>
+            <button class="btn" onclick="startGame()">MULA PERJALANAN 🚀</button>
+            <div style="margin-top: 20px; font-size: 14px; opacity: 0.7;">
+                Tip: Gunakan ⬅️ ➡️ untuk jalan, Space untuk lompat
+            </div>
+        </div>
+    </div>
+
+    <!-- Sesi Membaca -->
+    <div id="reading-screen" class="overlay hidden">
+        <div id="word-modal">
+            <h2 style="color: #2e7d32; font-size: clamp(28px, 6vw, 40px); margin: 0;">🎉 TAHNIAH! 🎉</h2>
+            <p style="font-size: clamp(16px, 3vw, 20px); color: #666;">Sila baca perkataan ini dengan kuat:</p>
+            <div id="current-words" class="word-list"></div>
+            <button class="btn" onclick="nextLevel()">SAYA SUDAH BACA! ✅</button>
+        </div>
+    </div>
+
+    <!-- Tamat Permainan -->
+    <div id="victory-screen" class="overlay hidden">
+        <div style="background: white; padding: 40px; border-radius: 30px; border: 8px solid var(--sun-yellow); color: #333;">
+            <h1 style="font-size: 80px; margin: 0;">🏆</h1>
+            <h1 style="font-size: clamp(35px, 8vw, 55px); color: #f1c40f;">JUARA MEMBACA!</h1>
+            <p style="font-size: clamp(18px, 4vw, 24px);">Hebat! Anda telah menamatkan semua cabaran.</p>
+            <button class="btn" onclick="location.reload()">MAIN SEMULA</button>
+        </div>
+    </div>
+
+    <!-- Controls Responsif -->
+    <div id="controls">
+        <div class="control-group">
+            <div class="ctrl-btn" onmousedown="handleControl('left', true)" ontouchstart="handleControl('left', true)" onmouseup="handleControl('left', false)" ontouchend="handleControl('left', false)">⬅️</div>
+            <div class="ctrl-btn" onmousedown="handleControl('right', true)" ontouchstart="handleControl('right', true)" onmouseup="handleControl('right', false)" ontouchend="handleControl('right', false)">➡️</div>
+        </div>
+        <div class="control-group">
+            <div class="ctrl-btn" onmousedown="handleControl('up', true)" ontouchstart="handleControl('up', true)" onmouseup="handleControl('up', false)" ontouchend="handleControl('up', false)">🚀</div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- AUDIO ENGINE (8-BIT STYLE) ---
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    let audioCtx = null;
+    let isMuted = false;
+
+    function initAudio() { if (!audioCtx) audioCtx = new AudioContext(); }
+
+    function playNote(freq, type, start, duration, vol = 0.1) {
+        if (isMuted || !audioCtx) return;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = type;
+        osc.frequency.setValueAtTime(freq, start);
+        gain.gain.setValueAtTime(vol, start);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
+        osc.connect(gain); gain.connect(audioCtx.destination);
+        osc.start(start); osc.stop(start + duration);
+    }
+
+    function playBGM() {
+        if (gameState !== 'PLAYING' || isMuted) return;
+        const now = audioCtx.currentTime;
+        const melody = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
+        melody.forEach((f, i) => playNote(f, 'triangle', now + i * 0.4, 0.3, 0.04));
+        setTimeout(playBGM, 2400);
+    }
+
+    function playWinSound() {
+        const now = audioCtx.currentTime;
+        [523, 659, 783, 1046].forEach((f, i) => playNote(f, 'square', now + i * 0.1, 0.5, 0.08));
+    }
+
+    function playJumpSound() { playNote(400, 'sine', audioCtx.currentTime, 0.1, 0.08); playNote(600, 'sine', audioCtx.currentTime + 0.05, 0.1, 0.08); }
+    function playHurtSound() { playNote(120, 'sawtooth', audioCtx.currentTime, 0.3, 0.1); }
+
+    function toggleMute() {
+        isMuted = !isMuted;
+        document.getElementById('mute-btn').innerText = isMuted ? '❌' : '🔊';
+        if (!isMuted && gameState === 'PLAYING') playBGM();
+    }
+
+    // --- GAME ENGINE ---
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const INTERNAL_WIDTH = 800;
+    const INTERNAL_HEIGHT = 450;
+    canvas.width = INTERNAL_WIDTH;
+    canvas.height = INTERNAL_HEIGHT;
+
+    const gravity = 0.8;
+    const friction = 0.8;
+    let gameState = 'MENU';
+    let currentLevel = 1;
+    let lives = 5;
+
+    const levelData = {
+        1: { words: ["cawan"], color: "#87CEEB", platforms: [{x:0,y:400,w:250,h:50},{x:350,y:320,w:150,h:30},{x:600,y:400,w:200,h:50}], spikes: [] },
+        2: { words: ["feri", "hutan"], color: "#a8e6cf", platforms: [{x:0,y:400,w:150,h:50},{x:200,y:300,w:100,h:20},{x:400,y:250,w:100,h:20},{x:650,y:400,w:150,h:50}], spikes: [] },
+        3: { words: ["jari", "ketam", "lori"], color: "#dcedc1", platforms: [{x:0,y:400,w:150,h:50},{x:250,y:320,w:100,h:20},{x:450,y:320,w:100,h:20},{x:650,y:400,w:150,h:50}], spikes: [{x:370,y:425,w:60,h:25}] },
+        4: { words: ["mata", "nasi", "paku", "roti"], color: "#ffd3b6", platforms: [{x:0,y:400,w:100,h:50},{x:150,y:350,w:80,h:20},{x:300,y:280,w:80,h:20},{x:450,y:210,w:80,h:20},{x:650,y:350,w:150,h:100}], spikes: [{x:250,y:425,w:350,h:25}] },
+        5: { 
+            words: ["qari", "susu", "tali", "van", "wisel"], 
+            color: "#ff8b94", 
+            platforms: [{x:0,y:400,w:100,h:50},{x:150,y:300,w:50,h:20},{x:300,y:220,w:50,h:20},{x:450,y:300,w:50,h:20},{x:600,y:220,w:50,h:20},{x:700,y:400,w:100,h:50}], 
+            spikes: [{x:100,y:425,w:600,h:25}]
+        }
+    };
+
+    class Player {
+        constructor() { this.reset(); }
+        reset() {
+            this.x = 30; this.y = 300;
+            this.width = 32; this.height = 32;
+            this.velX = 0; this.velY = 0;
+            this.speed = 4.8; this.jumpForce = 13.5;
+            this.grounded = false;
+        }
+        draw() {
+            // Shadow
+            ctx.fillStyle = "rgba(0,0,0,0.1)";
+            ctx.fillRect(this.x + 4, this.y + 4, this.width, this.height);
+            // Body
+            ctx.fillStyle = "#FF5722";
+            ctx.beginPath(); ctx.roundRect(this.x, this.y, this.width, this.height, 6); ctx.fill();
+            // Headband
+            ctx.fillStyle = "#333"; ctx.fillRect(this.x, this.y + 6, this.width, 4);
+            // Eyes
+            ctx.fillStyle = "white"; ctx.fillRect(this.x + 18, this.y + 10, 8, 8);
+            ctx.fillStyle = "black"; ctx.fillRect(this.x + 22, this.y + 12, 4, 4);
+        }
+        update() {
+            if (keys['ArrowRight'] || keys['right']) { if (this.velX < this.speed) this.velX += 0.8; }
+            else if (keys['ArrowLeft'] || keys['left']) { if (this.velX > -this.speed) this.velX -= 0.8; }
+            else { this.velX *= friction; }
+
+            this.x += this.velX;
+            this.velY += gravity;
+            this.y += this.velY;
+            this.grounded = false;
+
+            levelData[currentLevel].platforms.forEach(plat => {
+                if (this.x < plat.x + plat.w && this.x + this.width > plat.x &&
+                    this.y < plat.y + plat.h && this.y + this.height > plat.y) {
+                    if (this.velY > 0 && this.y + this.height - this.velY <= plat.y) {
+                        this.y = plat.y - this.height; this.velY = 0; this.grounded = true;
+                    }
+                    else if (this.x + this.width - this.velX <= plat.x) { this.x = plat.x - this.width; this.velX = 0; }
+                    else if (this.x - this.velX >= plat.x + plat.w) { this.x = plat.x + plat.w; this.velX = 0; }
+                }
+            });
+
+            levelData[currentLevel].spikes.forEach(s => {
+                if (this.x < s.x + s.w && this.x + this.width > s.x &&
+                    this.y < s.y + s.h && this.y + this.height > s.y) { this.die(); }
+            });
+
+            if (this.x < 0) this.x = 0;
+            if (this.x > INTERNAL_WIDTH - this.width) this.x = INTERNAL_WIDTH - this.width;
+            if (this.y > INTERNAL_HEIGHT) this.die();
+
+            if (this.x + this.width > 750 && this.y + this.height > 300) { completeLevel(); }
+        }
+        die() {
+            playHurtSound(); lives--; updateLivesDisplay();
+            if (lives <= 0) {
+                lives = 5; currentLevel = 1; updateLivesDisplay();
+                document.getElementById('lvl-num').innerText = currentLevel;
+            }
+            this.reset();
+        }
+        jump() { if (this.grounded) { this.velY = -this.jumpForce; this.grounded = false; playJumpSound(); } }
+    }
+
+    const player = new Player();
+    const keys = {};
+
+    function updateLivesDisplay() {
+        document.getElementById('lives-display').innerText = '❤️'.repeat(lives);
+    }
+
+    function startGame() {
+        initAudio();
+        document.getElementById('menu-screen').classList.add('hidden');
+        gameState = 'PLAYING';
+        currentLevel = 1; lives = 5;
+        updateLivesDisplay();
+        document.getElementById('lvl-num').innerText = currentLevel;
+        player.reset(); playBGM(); requestAnimationFrame(gameLoop);
+    }
+
+    function completeLevel() {
+        if (gameState !== 'PLAYING') return;
+        gameState = 'READING'; playWinSound();
+        const wordContainer = document.getElementById('current-words');
+        wordContainer.innerHTML = '';
+        levelData[currentLevel].words.forEach(word => {
+            const div = document.createElement('div');
+            div.className = 'word-item'; div.innerText = word;
+            wordContainer.appendChild(div);
+        });
+        document.getElementById('reading-screen').classList.remove('hidden');
+    }
+
+    function nextLevel() {
+        document.getElementById('reading-screen').classList.add('hidden');
+        if (currentLevel < 5) {
+            currentLevel++; gameState = 'PLAYING'; lives = 5;
+            updateLivesDisplay(); document.getElementById('lvl-num').innerText = currentLevel;
+            player.reset(); requestAnimationFrame(gameLoop);
+        } else {
+            gameState = 'VICTORY'; document.getElementById('victory-screen').classList.remove('hidden');
+        }
+    }
+
+    function gameLoop() {
+        if (gameState === 'PLAYING') { player.update(); draw(); requestAnimationFrame(gameLoop); }
+    }
+
+    function draw() {
+        ctx.fillStyle = levelData[currentLevel].color;
+        ctx.fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
+
+        // Decor
+        ctx.fillStyle = "rgba(255,255,255,0.3)";
+        ctx.beginPath(); ctx.arc(100, 80, 20, 0, 7); ctx.arc(130, 70, 30, 0, 7); ctx.arc(160, 80, 20, 0, 7); ctx.fill();
+
+        levelData[currentLevel].platforms.forEach(p => {
+            ctx.fillStyle = "#4CAF50"; ctx.fillRect(p.x, p.y, p.w, 8);
+            ctx.fillStyle = "#795548"; ctx.fillRect(p.x, p.y + 8, p.w, p.h - 8);
+        });
+
+        ctx.fillStyle = "#555";
+        levelData[currentLevel].spikes.forEach(s => {
+            for (let i = 0; i < s.w; i += 15) {
+                ctx.beginPath(); ctx.moveTo(s.x + i, s.y + s.h); ctx.lineTo(s.x + i + 7.5, s.y); ctx.lineTo(s.x + i + 15, s.y + s.h); ctx.fill();
+            }
+        });
+
+        // Flag
+        ctx.fillStyle = "#D32F2F"; ctx.beginPath(); ctx.moveTo(760, 320); ctx.lineTo(795, 335); ctx.lineTo(760, 350); ctx.fill();
+        ctx.strokeStyle = "#333"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(760, 320); ctx.lineTo(760, 420); ctx.stroke();
+
+        player.draw();
+    }
+
+    window.addEventListener('keydown', e => {
+        keys[e.code] = true;
+        if ((e.code === 'Space' || e.code === 'ArrowUp') && gameState === 'PLAYING') player.jump();
+    });
+    window.addEventListener('keyup', e => keys[e.code] = false);
+
+    function handleControl(dir, state) {
+        keys[dir] = state;
+        if (dir === 'up' && state && gameState === 'PLAYING') player.jump();
+    }
+</script>
+</body>
+</html>
