@@ -3,477 +3,484 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Misi Membaca: Portal Pembelajaran Interaktif</title>
-    <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@700&family=Fredoka:wght@400;600&display=swap" rel="stylesheet">
+    <title>Misi Penyelamat Rimba: Sang Kancil Bijak</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        :root {
-            --sky-blue: #87CEEB;
-            --grass-green: #4CAF50;
-            --dirt-brown: #8B4513;
-            --sun-yellow: #FFD700;
-            --danger-red: #ff4757;
-            --ui-white: rgba(255, 255, 255, 0.9);
-        }
-
-        * {
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
         body {
             margin: 0;
-            padding: 0;
             overflow: hidden;
-            background-color: #1a1a1a;
-            font-family: 'Fredoka', sans-serif;
-            user-select: none;
+            background: #1a2e1a;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
         }
-
-        /* Container responsif */
-        #game-wrapper {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-        }
-
         canvas {
-            background-color: var(--sky-blue);
-            box-shadow: 0 10px 50px rgba(0,0,0,0.5);
-            max-width: 100%;
-            max-height: 100%;
-            aspect-ratio: 16/9;
-            border-radius: 8px;
-            image-rendering: pixelated; /* Memberikan rasa game retro */
+            display: block;
+            background: linear-gradient(to bottom, #87CEEB 0%, #228B22 100%);
         }
-
-        /* Overlays */
-        .overlay {
+        #game-ui {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            pointer-events: none;
+            z-index: 10;
+        }
+        .overlay {
+            pointer-events: auto;
+            background: rgba(0, 0, 0, 0.85);
             display: flex;
             flex-direction: column;
-            justify-content: center;
             align-items: center;
-            background: rgba(0,0,0,0.85);
-            color: white;
-            z-index: 100;
+            justify-content: center;
             text-align: center;
-            backdrop-filter: blur(8px);
+            color: white;
             padding: 20px;
         }
-
         .hidden { display: none !important; }
-
-        .btn {
-            background: linear-gradient(to bottom, #ff9800, #f57c00);
-            border: none;
-            padding: 18px 45px;
-            color: white;
-            font-size: clamp(20px, 4vw, 28px);
-            font-weight: bold;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 6px 0 #e68a00, 0 10px 20px rgba(0,0,0,0.3);
-            margin: 15px;
-            font-family: 'Comfortaa', cursive;
-            transition: all 0.1s ease;
+        .heart {
+            font-size: 2.5rem;
+            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
         }
-
-        .btn:active {
+        /* Style untuk Suku Kata */
+        .syllable-slot {
+            min-width: 60px;
+            height: 60px;
+            border: 3px dashed #fbbf24;
+            background: rgba(255, 255, 255, 0.05);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 12px;
+            margin: 0 8px;
+            padding: 0 10px;
+            color: #fbbf24;
+        }
+        .syllable-btn {
+            min-width: 60px;
+            height: 60px;
+            background: #fbbf24;
+            color: #1a2e1a;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            box-shadow: 0 4px 0 #b45309;
+            transition: all 0.1s;
+            margin: 0 5px;
+            padding: 0 15px;
+        }
+        .syllable-btn:active {
             transform: translateY(4px);
-            box-shadow: 0 2px 0 #e68a00;
+            box-shadow: none;
         }
-
-        /* Modal Perkataan */
-        #word-modal {
-            background: white;
-            color: #333;
-            padding: clamp(20px, 5vw, 40px);
-            border-radius: 30px;
-            border: 8px solid var(--sun-yellow);
-            width: 90%;
-            max-width: 600px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+        .final-word {
+            font-size: 4rem;
+            font-weight: 900;
+            color: #fbbf24;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+            margin: 20px 0;
         }
-
-        .word-list {
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: clamp(10px, 2vw, 20px);
-            margin: 25px 0;
-        }
-
-        .word-item {
-            background: #e3f2fd;
-            padding: clamp(10px, 3vw, 20px) clamp(20px, 5vw, 40px);
-            border-radius: 20px;
-            font-size: clamp(30px, 8vw, 50px);
-            font-weight: bold;
-            color: #1565c0;
-            border: 4px solid #bbdefb;
-            animation: wordBounce 2s infinite ease-in-out;
-        }
-
-        @keyframes wordBounce {
-            0%, 100% { transform: translateY(0) scale(1); }
-            50% { transform: translateY(-10px) scale(1.05); }
-        }
-
-        /* Heads Up Display (HUD) */
-        #hud {
-            position: absolute;
-            top: 15px;
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 20px;
-            z-index: 10;
-            pointer-events: none;
-        }
-
-        .badge {
-            background: var(--ui-white);
-            color: #333;
-            padding: 8px 20px;
-            border-radius: 15px;
-            font-size: clamp(16px, 3vw, 22px);
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            border: 2px solid var(--sun-yellow);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        /* Controls */
-        #controls {
-            position: absolute;
-            bottom: clamp(15px, 4vw, 30px);
-            width: 100%;
-            display: flex;
-            justify-content: space-between;
-            padding: 0 clamp(15px, 5vw, 50px);
-            pointer-events: none;
-            z-index: 20;
-        }
-
-        .control-group { display: flex; gap: clamp(10px, 3vw, 25px); pointer-events: auto; }
-
-        .ctrl-btn {
-            width: clamp(70px, 15vw, 95px);
-            height: clamp(70px, 15vw, 95px);
-            background: rgba(255, 255, 255, 0.25);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: clamp(30px, 8vw, 45px);
-            color: white;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            backdrop-filter: blur(5px);
-            cursor: pointer;
-            box-shadow: 0 6px 15px rgba(0,0,0,0.2);
-        }
-
-        .ctrl-btn:active { background: rgba(255, 255, 255, 0.5); transform: scale(0.95); }
-
-        #mute-btn {
+        .control-btn {
             pointer-events: auto;
-            width: 50px;
-            height: 50px;
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.3);
             border-radius: 50%;
-            background: var(--ui-white);
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            user-select: none;
         }
     </style>
 </head>
 <body>
 
-<div id="game-wrapper">
-    <!-- UI Layer -->
-    <div id="hud">
-        <div class="badge">Aras: <span id="lvl-num">1</span></div>
-        <button id="mute-btn" onclick="toggleMute()">🔊</button>
-        <div class="badge">Nyawa: <span id="lives-display">❤️❤️❤️❤️❤️</span></div>
-    </div>
-    
-    <canvas id="gameCanvas"></canvas>
+    <div id="game-ui">
+        <!-- Status Bar -->
+        <div class="flex justify-between items-start p-4">
+            <div class="bg-black/50 p-2 rounded-xl border border-green-500/50">
+                <p class="text-green-400 text-[10px] uppercase font-bold tracking-widest">Jarak</p>
+                <p id="score-val" class="text-white text-xl font-mono">0m</p>
+            </div>
+            <div class="flex gap-2" id="lives-container">
+                <!-- Hati dijana di sini -->
+            </div>
+        </div>
 
-    <!-- Menu -->
-    <div id="menu-screen" class="overlay">
-        <div style="background: white; padding: 40px; border-radius: 30px; border: 8px solid var(--sun-yellow); color: #333;">
-            <h1 style="font-size: clamp(40px, 10vw, 70px); color: #e67e22; margin: 0; text-shadow: 2px 2px 0 #f39c12;">MISI MEMBACA</h1>
-            <p style="font-size: clamp(18px, 4vw, 24px); margin: 15px 0 30px;">Kumpul ilmu, elak bahaya, dan jadilah juara!</p>
-            <button class="btn" onclick="startGame()">MULA PERJALANAN 🚀</button>
-            <div style="margin-top: 20px; font-size: 14px; opacity: 0.7;">
-                Tip: Gunakan ⬅️ ➡️ untuk jalan, Space untuk lompat
+        <!-- Touch Controls -->
+        <div class="absolute bottom-10 left-10 flex gap-4">
+            <div class="control-btn" id="btn-left">⬅️</div>
+            <div class="control-btn" id="btn-right">➡️</div>
+        </div>
+        <div class="absolute bottom-10 right-10">
+            <div class="control-btn w-20 h-20 bg-blue-500/50" id="btn-jump">⬆️</div>
+        </div>
+
+        <!-- Start Screen -->
+        <div id="start-screen" class="overlay absolute inset-0">
+            <div class="mb-6 animate-bounce">
+                <span class="text-8xl">🦌</span>
+            </div>
+            <h1 class="text-4xl font-black mb-2 text-green-400 italic">MISI PENYELAMAT RIMBA</h1>
+            <p class="text-gray-300 mb-8 max-w-xs">Bantu Sang Kancil merentasi hutan. Elak lubang dan labah-labah!</p>
+            <button onclick="startGame()" class="bg-green-600 hover:bg-green-500 px-10 py-4 rounded-full font-bold text-xl shadow-lg transition-all">MULA KEMBARA</button>
+        </div>
+
+        <!-- Peti Ajaib (Recovery Screen) -->
+        <div id="recovery-screen" class="overlay absolute inset-0 hidden">
+            <div class="bg-amber-900 border-4 border-amber-500 p-6 md:p-10 rounded-[2rem] max-w-2xl w-full shadow-2xl">
+                <div class="mb-4">
+                    <span class="text-6xl">🎁</span>
+                </div>
+                <h2 class="text-2xl font-black text-amber-400 uppercase tracking-widest mb-1">PETI AJAIB</h2>
+                <p id="instruction-text" class="text-gray-300 text-sm mb-6">Susun suku kata dengan betul untuk dapatkan nyawa!</p>
+                
+                <!-- Syllable Slots -->
+                <div id="syllable-slots" class="flex justify-center mb-8 flex-wrap gap-y-4"></div>
+                
+                <!-- Scrambled Syllable Options -->
+                <div id="syllable-options" class="flex justify-center gap-3 mb-8 flex-wrap"></div>
+
+                <!-- Final Word Display (Hidden initially) -->
+                <div id="final-word-display" class="hidden final-word animate-bounce"></div>
+
+                <div id="feedback" class="h-8 text-lg font-bold mb-6"></div>
+
+                <div class="flex flex-col gap-3">
+                    <button id="btn-finish-reading" onclick="finishReading()" class="hidden bg-green-600 hover:bg-green-500 px-8 py-4 rounded-xl font-black text-xl shadow-lg transition-all">
+                        SELESAI MEMBACA & SAMBUNG
+                    </button>
+                    
+                    <button id="btn-reset" onclick="resetRecovery()" class="text-amber-500 text-xs underline uppercase tracking-widest">Padam & Cuba Lagi</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Sesi Membaca -->
-    <div id="reading-screen" class="overlay hidden">
-        <div id="word-modal">
-            <h2 style="color: #2e7d32; font-size: clamp(28px, 6vw, 40px); margin: 0;">🎉 TAHNIAH! 🎉</h2>
-            <p style="font-size: clamp(16px, 3vw, 20px); color: #666;">Sila baca perkataan ini dengan kuat:</p>
-            <div id="current-words" class="word-list"></div>
-            <button class="btn" onclick="nextLevel()">SAYA SUDAH BACA! ✅</button>
-        </div>
-    </div>
+    <canvas id="gameCanvas"></canvas>
 
-    <!-- Tamat Permainan -->
-    <div id="victory-screen" class="overlay hidden">
-        <div style="background: white; padding: 40px; border-radius: 30px; border: 8px solid var(--sun-yellow); color: #333;">
-            <h1 style="font-size: 80px; margin: 0;">🏆</h1>
-            <h1 style="font-size: clamp(35px, 8vw, 55px); color: #f1c40f;">JUARA MEMBACA!</h1>
-            <p style="font-size: clamp(18px, 4vw, 24px);">Hebat! Anda telah menamatkan semua cabaran.</p>
-            <button class="btn" onclick="location.reload()">MAIN SEMULA</button>
-        </div>
-    </div>
+    <script>
+        const wordsData = [
+            { word: "tupai", syllables: ["tu", "pai"] },
+            { word: "pantai", syllables: ["pan", "tai"] },
+            { word: "aurat", syllables: ["au", "rat"] },
+            { word: "kerbau", syllables: ["ker", "bau"] },
+            { word: "kaloi", syllables: ["ka", "loi"] },
+            { word: "amboi", syllables: ["am", "boi"] },
+            { word: "yang", syllables: ["yang"] },
+            { word: "bunga", syllables: ["bu", "nga"] },
+            { word: "khabar", syllables: ["kha", "bar"] },
+            { word: "khemah", syllables: ["khe", "mah"] },
+            { word: "syukur", syllables: ["syu", "kur"] },
+            { word: "nasyid", syllables: ["na", "syid"] },
+            { word: "penyu", syllables: ["pe", "nyu"] },
+            { word: "minyak", syllables: ["mi", "nyak"] },
+            { word: "daun", syllables: ["da", "un"] },
+            { word: "kain", syllables: ["ka", "in"] },
+            { word: "piano", syllables: ["pi", "a", "no"] },
+            { word: "radio", syllables: ["ra", "di", "o"] },
+            { word: "saat", syllables: ["sa", "at"] }
+        ];
 
-    <!-- Controls Responsif -->
-    <div id="controls">
-        <div class="control-group">
-            <div class="ctrl-btn" onmousedown="handleControl('left', true)" ontouchstart="handleControl('left', true)" onmouseup="handleControl('left', false)" ontouchend="handleControl('left', false)">⬅️</div>
-            <div class="ctrl-btn" onmousedown="handleControl('right', true)" ontouchstart="handleControl('right', true)" onmouseup="handleControl('right', false)" ontouchend="handleControl('right', false)">➡️</div>
-        </div>
-        <div class="control-group">
-            <div class="ctrl-btn" onmousedown="handleControl('up', true)" ontouchstart="handleControl('up', true)" onmouseup="handleControl('up', false)" ontouchend="handleControl('up', false)">🚀</div>
-        </div>
-    </div>
-</div>
-
-<script>
-    // --- AUDIO ENGINE (8-BIT STYLE) ---
-    const AudioContext = window.AudioContext || window.webkitAudioContext;
-    let audioCtx = null;
-    let isMuted = false;
-
-    function initAudio() { if (!audioCtx) audioCtx = new AudioContext(); }
-
-    function playNote(freq, type, start, duration, vol = 0.1) {
-        if (isMuted || !audioCtx) return;
-        const osc = audioCtx.createOscillator();
-        const gain = audioCtx.createGain();
-        osc.type = type;
-        osc.frequency.setValueAtTime(freq, start);
-        gain.gain.setValueAtTime(vol, start);
-        gain.gain.exponentialRampToValueAtTime(0.0001, start + duration);
-        osc.connect(gain); gain.connect(audioCtx.destination);
-        osc.start(start); osc.stop(start + duration);
-    }
-
-    function playBGM() {
-        if (gameState !== 'PLAYING' || isMuted) return;
-        const now = audioCtx.currentTime;
-        const melody = [261.63, 329.63, 392.00, 523.25, 392.00, 329.63];
-        melody.forEach((f, i) => playNote(f, 'triangle', now + i * 0.4, 0.3, 0.04));
-        setTimeout(playBGM, 2400);
-    }
-
-    function playWinSound() {
-        const now = audioCtx.currentTime;
-        [523, 659, 783, 1046].forEach((f, i) => playNote(f, 'square', now + i * 0.1, 0.5, 0.08));
-    }
-
-    function playJumpSound() { playNote(400, 'sine', audioCtx.currentTime, 0.1, 0.08); playNote(600, 'sine', audioCtx.currentTime + 0.05, 0.1, 0.08); }
-    function playHurtSound() { playNote(120, 'sawtooth', audioCtx.currentTime, 0.3, 0.1); }
-
-    function toggleMute() {
-        isMuted = !isMuted;
-        document.getElementById('mute-btn').innerText = isMuted ? '❌' : '🔊';
-        if (!isMuted && gameState === 'PLAYING') playBGM();
-    }
-
-    // --- GAME ENGINE ---
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const INTERNAL_WIDTH = 800;
-    const INTERNAL_HEIGHT = 450;
-    canvas.width = INTERNAL_WIDTH;
-    canvas.height = INTERNAL_HEIGHT;
-
-    const gravity = 0.8;
-    const friction = 0.8;
-    let gameState = 'MENU';
-    let currentLevel = 1;
-    let lives = 5;
-
-    const levelData = {
-        1: { words: ["cawan"], color: "#87CEEB", platforms: [{x:0,y:400,w:250,h:50},{x:350,y:320,w:150,h:30},{x:600,y:400,w:200,h:50}], spikes: [] },
-        2: { words: ["feri", "hutan"], color: "#a8e6cf", platforms: [{x:0,y:400,w:150,h:50},{x:200,y:300,w:100,h:20},{x:400,y:250,w:100,h:20},{x:650,y:400,w:150,h:50}], spikes: [] },
-        3: { words: ["jari", "ketam", "lori"], color: "#dcedc1", platforms: [{x:0,y:400,w:150,h:50},{x:250,y:320,w:100,h:20},{x:450,y:320,w:100,h:20},{x:650,y:400,w:150,h:50}], spikes: [{x:370,y:425,w:60,h:25}] },
-        4: { words: ["mata", "nasi", "paku", "roti"], color: "#ffd3b6", platforms: [{x:0,y:400,w:100,h:50},{x:150,y:350,w:80,h:20},{x:300,y:280,w:80,h:20},{x:450,y:210,w:80,h:20},{x:650,y:350,w:150,h:100}], spikes: [{x:250,y:425,w:350,h:25}] },
-        5: { 
-            words: ["qari", "susu", "tali", "van", "wisel"], 
-            color: "#ff8b94", 
-            platforms: [{x:0,y:400,w:100,h:50},{x:150,y:300,w:50,h:20},{x:300,y:220,w:50,h:20},{x:450,y:300,w:50,h:20},{x:600,y:220,w:50,h:20},{x:700,y:400,w:100,h:50}], 
-            spikes: [{x:100,y:425,w:600,h:25}]
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function playNote(freq, type, dur, vol=0.1) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
+            osc.connect(gain); gain.connect(audioCtx.destination);
+            osc.start(); osc.stop(audioCtx.currentTime + dur);
         }
-    };
 
-    class Player {
-        constructor() { this.reset(); }
-        reset() {
-            this.x = 30; this.y = 300;
-            this.width = 32; this.height = 32;
-            this.velX = 0; this.velY = 0;
-            this.speed = 4.8; this.jumpForce = 13.5;
-            this.grounded = false;
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+        const scoreDisplay = document.getElementById('score-val');
+        const livesContainer = document.getElementById('lives-container');
+        const recoveryScreen = document.getElementById('recovery-screen');
+        const syllableSlots = document.getElementById('syllable-slots');
+        const syllableOptions = document.getElementById('syllable-options');
+        const feedback = document.getElementById('feedback');
+        const btnFinish = document.getElementById('btn-finish-reading');
+        const finalWordDisplay = document.getElementById('final-word-display');
+        const instructionText = document.getElementById('instruction-text');
+        const btnReset = document.getElementById('btn-reset');
+
+        let gameState = 'START';
+        let score = 0;
+        let lives = 2;
+        let worldX = 0;
+        let lastTime = 0;
+        let player = { x: 100, y: 0, w: 50, h: 50, vy: 0, speed: 5, jumpForce: -15, grounded: false };
+        let platforms = [];
+        let enemies = [];
+        let selectedWordObj = null;
+        let currentGuess = [];
+
+        const keys = { left: false, right: false, up: false };
+        window.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') keys.left = true;
+            if (e.key === 'ArrowRight') keys.right = true;
+            if (e.key === 'ArrowUp' || e.key === ' ') keys.up = true;
+        });
+        window.addEventListener('keyup', e => {
+            if (e.key === 'ArrowLeft') keys.left = false;
+            if (e.key === 'ArrowRight') keys.right = false;
+            if (e.key === 'ArrowUp' || e.key === ' ') keys.up = false;
+        });
+
+        const bindTouch = (id, key) => {
+            const btn = document.getElementById(id);
+            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
+            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
+        };
+        bindTouch('btn-left', 'left');
+        bindTouch('btn-right', 'right');
+        bindTouch('btn-jump', 'up');
+
+        function resize() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            if (gameState === 'START') initLevel();
         }
-        draw() {
-            // Shadow
-            ctx.fillStyle = "rgba(0,0,0,0.1)";
-            ctx.fillRect(this.x + 4, this.y + 4, this.width, this.height);
-            // Body
-            ctx.fillStyle = "#FF5722";
-            ctx.beginPath(); ctx.roundRect(this.x, this.y, this.width, this.height, 6); ctx.fill();
-            // Headband
-            ctx.fillStyle = "#333"; ctx.fillRect(this.x, this.y + 6, this.width, 4);
-            // Eyes
-            ctx.fillStyle = "white"; ctx.fillRect(this.x + 18, this.y + 10, 8, 8);
-            ctx.fillStyle = "black"; ctx.fillRect(this.x + 22, this.y + 12, 4, 4);
+        window.addEventListener('resize', resize);
+        resize();
+
+        function initLevel() {
+            platforms = [{ x: 0, y: canvas.height - 100, w: 800, h: 100 }];
+            enemies = [];
+            worldX = 0;
+            player.x = 100;
+            player.y = canvas.height - 200;
+            player.vy = 0;
+            for(let i=0; i<10; i++) addPlatform();
         }
-        update() {
-            if (keys['ArrowRight'] || keys['right']) { if (this.velX < this.speed) this.velX += 0.8; }
-            else if (keys['ArrowLeft'] || keys['left']) { if (this.velX > -this.speed) this.velX -= 0.8; }
-            else { this.velX *= friction; }
 
-            this.x += this.velX;
-            this.velY += gravity;
-            this.y += this.velY;
-            this.grounded = false;
+        function addPlatform() {
+            const last = platforms[platforms.length - 1];
+            const gap = 120 + Math.random() * 80;
+            const width = 200 + Math.random() * 300;
+            const y = canvas.height - (100 + Math.random() * 150);
+            const newPlat = { x: last.x + last.w + gap, y: y, w: width, h: 400 };
+            platforms.push(newPlat);
+            if (Math.random() > 0.6) {
+                enemies.push({ x: newPlat.x + 50, y: newPlat.y - 30, w: 30, h: 30, range: width - 60, startx: newPlat.x + 50, dir: 1, speed: 2 });
+            }
+        }
 
-            levelData[currentLevel].platforms.forEach(plat => {
-                if (this.x < plat.x + plat.w && this.x + this.width > plat.x &&
-                    this.y < plat.y + plat.h && this.y + this.height > plat.y) {
-                    if (this.velY > 0 && this.y + this.height - this.velY <= plat.y) {
-                        this.y = plat.y - this.height; this.velY = 0; this.grounded = true;
-                    }
-                    else if (this.x + this.width - this.velX <= plat.x) { this.x = plat.x - this.width; this.velX = 0; }
-                    else if (this.x - this.velX >= plat.x + plat.w) { this.x = plat.x + plat.w; this.velX = 0; }
+        function startGame() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            document.getElementById('start-screen').classList.add('hidden');
+            gameState = 'PLAYING';
+            lives = 2;
+            score = 0;
+            initLevel();
+            updateLivesUI();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updateLivesUI() {
+            livesContainer.innerHTML = '';
+            for(let i=0; i<2; i++) {
+                const h = document.createElement('span');
+                h.className = 'heart';
+                h.innerHTML = i < lives ? '❤️' : '🖤';
+                livesContainer.appendChild(h);
+            }
+        }
+
+        function triggerRecovery() {
+            gameState = 'RECOVERY';
+            recoveryScreen.classList.remove('hidden');
+            btnFinish.classList.add('hidden');
+            finalWordDisplay.classList.add('hidden');
+            syllableSlots.classList.remove('hidden');
+            syllableOptions.classList.remove('hidden');
+            instructionText.innerText = "Susun suku kata dengan betul untuk dapatkan nyawa!";
+            btnReset.classList.remove('hidden');
+            
+            selectedWordObj = wordsData[Math.floor(Math.random() * wordsData.length)];
+            playNote(400, 'sine', 0.5);
+            resetRecovery();
+        }
+
+        function resetRecovery() {
+            currentGuess = [];
+            feedback.innerText = "";
+            btnFinish.classList.add('hidden');
+            finalWordDisplay.classList.add('hidden');
+            syllableSlots.classList.remove('hidden');
+            syllableOptions.classList.remove('hidden');
+            renderRecoveryUI();
+        }
+
+        function renderRecoveryUI() {
+            syllableSlots.innerHTML = '';
+            selectedWordObj.syllables.forEach((_, i) => {
+                const slot = document.createElement('div');
+                slot.className = 'syllable-slot';
+                slot.innerText = currentGuess[i] || "";
+                syllableSlots.appendChild(slot);
+            });
+
+            syllableOptions.innerHTML = '';
+            const shuffled = [...selectedWordObj.syllables].sort(() => Math.random() - 0.5);
+            shuffled.forEach(syl => {
+                const btn = document.createElement('div');
+                btn.className = 'syllable-btn';
+                btn.innerText = syl;
+                btn.onclick = () => selectSyllable(syl, btn);
+                syllableOptions.appendChild(btn);
+            });
+        }
+
+        function selectSyllable(syl, btn) {
+            if (currentGuess.length < selectedWordObj.syllables.length) {
+                currentGuess.push(syl);
+                btn.style.visibility = 'hidden';
+                playNote(600 + (currentGuess.length * 50), 'triangle', 0.1);
+                
+                const slots = syllableSlots.children;
+                slots[currentGuess.length - 1].innerText = syl;
+
+                if (currentGuess.length === selectedWordObj.syllables.length) {
+                    checkAnswer();
+                }
+            }
+        }
+
+        function checkAnswer() {
+            const isCorrect = currentGuess.every((val, index) => val === selectedWordObj.syllables[index]);
+            
+            if (isCorrect) {
+                playNote(800, 'sine', 0.5);
+                
+                // Sembunyikan slot susunan & pilihan
+                syllableSlots.classList.add('hidden');
+                syllableOptions.classList.add('hidden');
+                btnReset.classList.add('hidden');
+                
+                // Tunjukkan perkataan penuh
+                finalWordDisplay.innerText = selectedWordObj.word;
+                finalWordDisplay.classList.remove('hidden');
+                
+                instructionText.innerText = "Sila baca perkataan ini:";
+                feedback.innerText = "HEBAT! Mari sambung larian.";
+                feedback.className = "h-8 text-lg font-bold mb-6 text-green-400";
+                
+                btnFinish.classList.remove('hidden');
+            } else {
+                feedback.innerText = "SALAH! Cuba susun semula.";
+                feedback.className = "h-8 text-lg font-bold mb-6 text-red-400";
+                playNote(200, 'sawtooth', 0.3);
+                setTimeout(resetRecovery, 1200);
+            }
+        }
+
+        function finishReading() {
+            playNote(1000, 'sine', 0.3);
+            recoveryScreen.classList.add('hidden');
+            lives = 2;
+            updateLivesUI();
+            initLevel(); 
+            gameState = 'PLAYING';
+            requestAnimationFrame(gameLoop);
+        }
+
+        function gameLoop(timestamp) {
+            if (gameState !== 'PLAYING') return;
+            const dt = timestamp - lastTime;
+            lastTime = timestamp;
+
+            if (keys.left) player.x -= player.speed;
+            if (keys.right) player.x += player.speed;
+            player.vy += 0.8; 
+            player.y += player.vy;
+            player.grounded = false;
+
+            platforms.forEach(p => {
+                if (player.x + player.w > p.x && player.x < p.x + p.w &&
+                    player.y + player.h > p.y && player.y + player.h < p.y + p.h + player.vy) {
+                    if (player.vy > 0) { player.grounded = true; player.vy = 0; player.y = p.y - player.h; }
                 }
             });
 
-            levelData[currentLevel].spikes.forEach(s => {
-                if (this.x < s.x + s.w && this.x + this.width > s.x &&
-                    this.y < s.y + s.h && this.y + this.height > s.y) { this.die(); }
+            if (player.grounded && keys.up) {
+                player.vy = player.jumpForce;
+                playNote(300, 'square', 0.1, 0.05);
+            }
+
+            if (player.x > worldX + canvas.width / 2) worldX = player.x - canvas.width / 2;
+            if (player.y > canvas.height) handleDeath();
+
+            enemies.forEach(e => {
+                e.x += e.dir * e.speed;
+                if (e.x > e.startx + e.range || e.x < e.startx) e.dir *= -1;
+                if (player.x < e.x + e.w && player.x + player.w > e.x && player.y < e.y + e.h && player.y + player.h > e.y) handleDeath();
             });
 
-            if (this.x < 0) this.x = 0;
-            if (this.x > INTERNAL_WIDTH - this.width) this.x = INTERNAL_WIDTH - this.width;
-            if (this.y > INTERNAL_HEIGHT) this.die();
+            if (platforms[platforms.length - 1].x < worldX + canvas.width + 500) addPlatform();
 
-            if (this.x + this.width > 750 && this.y + this.height > 300) { completeLevel(); }
+            score = Math.floor(player.x / 50);
+            scoreDisplay.innerText = score + "m";
+
+            draw();
+            requestAnimationFrame(gameLoop);
         }
-        die() {
-            playHurtSound(); lives--; updateLivesDisplay();
-            if (lives <= 0) {
-                lives = 5; currentLevel = 1; updateLivesDisplay();
-                document.getElementById('lvl-num').innerText = currentLevel;
-            }
-            this.reset();
+
+        function handleDeath() {
+            lives--;
+            updateLivesUI();
+            playNote(150, 'sawtooth', 0.4);
+            if (lives <= 0) triggerRecovery();
+            else { player.y = canvas.height - 400; player.vy = 0; player.x = worldX + 100; }
         }
-        jump() { if (this.grounded) { this.velY = -this.jumpForce; this.grounded = false; playJumpSound(); } }
-    }
 
-    const player = new Player();
-    const keys = {};
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(-worldX, 0);
 
-    function updateLivesDisplay() {
-        document.getElementById('lives-display').innerText = '❤️'.repeat(lives);
-    }
+            ctx.fillStyle = '#5d4037';
+            platforms.forEach(p => {
+                ctx.fillRect(p.x, p.y, p.w, p.h);
+                ctx.fillStyle = '#2e7d32';
+                ctx.fillRect(p.x, p.y, p.w, 15);
+                ctx.fillStyle = '#5d4037';
+            });
 
-    function startGame() {
-        initAudio();
-        document.getElementById('menu-screen').classList.add('hidden');
-        gameState = 'PLAYING';
-        currentLevel = 1; lives = 5;
-        updateLivesDisplay();
-        document.getElementById('lvl-num').innerText = currentLevel;
-        player.reset(); playBGM(); requestAnimationFrame(gameLoop);
-    }
+            ctx.fillStyle = '#000';
+            enemies.forEach(e => {
+                ctx.beginPath();
+                ctx.arc(e.x + e.w/2, e.y + e.h/2, e.w/2, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = 'red';
+                ctx.fillRect(e.x + 5, e.y + 10, 4, 4);
+                ctx.fillRect(e.x + 20, e.y + 10, 4, 4);
+                ctx.fillStyle = '#000';
+            });
 
-    function completeLevel() {
-        if (gameState !== 'PLAYING') return;
-        gameState = 'READING'; playWinSound();
-        const wordContainer = document.getElementById('current-words');
-        wordContainer.innerHTML = '';
-        levelData[currentLevel].words.forEach(word => {
-            const div = document.createElement('div');
-            div.className = 'word-item'; div.innerText = word;
-            wordContainer.appendChild(div);
-        });
-        document.getElementById('reading-screen').classList.remove('hidden');
-    }
+            ctx.save();
+            ctx.translate(player.x + player.w / 2, player.y + player.h / 2);
+            ctx.scale(-1, 1);
+            ctx.font = '50px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🦌', 0, 0);
+            ctx.restore();
 
-    function nextLevel() {
-        document.getElementById('reading-screen').classList.add('hidden');
-        if (currentLevel < 5) {
-            currentLevel++; gameState = 'PLAYING'; lives = 5;
-            updateLivesDisplay(); document.getElementById('lvl-num').innerText = currentLevel;
-            player.reset(); requestAnimationFrame(gameLoop);
-        } else {
-            gameState = 'VICTORY'; document.getElementById('victory-screen').classList.remove('hidden');
+            ctx.restore();
         }
-    }
-
-    function gameLoop() {
-        if (gameState === 'PLAYING') { player.update(); draw(); requestAnimationFrame(gameLoop); }
-    }
-
-    function draw() {
-        ctx.fillStyle = levelData[currentLevel].color;
-        ctx.fillRect(0, 0, INTERNAL_WIDTH, INTERNAL_HEIGHT);
-
-        // Decor
-        ctx.fillStyle = "rgba(255,255,255,0.3)";
-        ctx.beginPath(); ctx.arc(100, 80, 20, 0, 7); ctx.arc(130, 70, 30, 0, 7); ctx.arc(160, 80, 20, 0, 7); ctx.fill();
-
-        levelData[currentLevel].platforms.forEach(p => {
-            ctx.fillStyle = "#4CAF50"; ctx.fillRect(p.x, p.y, p.w, 8);
-            ctx.fillStyle = "#795548"; ctx.fillRect(p.x, p.y + 8, p.w, p.h - 8);
-        });
-
-        ctx.fillStyle = "#555";
-        levelData[currentLevel].spikes.forEach(s => {
-            for (let i = 0; i < s.w; i += 15) {
-                ctx.beginPath(); ctx.moveTo(s.x + i, s.y + s.h); ctx.lineTo(s.x + i + 7.5, s.y); ctx.lineTo(s.x + i + 15, s.y + s.h); ctx.fill();
-            }
-        });
-
-        // Flag
-        ctx.fillStyle = "#D32F2F"; ctx.beginPath(); ctx.moveTo(760, 320); ctx.lineTo(795, 335); ctx.lineTo(760, 350); ctx.fill();
-        ctx.strokeStyle = "#333"; ctx.lineWidth = 4; ctx.beginPath(); ctx.moveTo(760, 320); ctx.lineTo(760, 420); ctx.stroke();
-
-        player.draw();
-    }
-
-    window.addEventListener('keydown', e => {
-        keys[e.code] = true;
-        if ((e.code === 'Space' || e.code === 'ArrowUp') && gameState === 'PLAYING') player.jump();
-    });
-    window.addEventListener('keyup', e => keys[e.code] = false);
-
-    function handleControl(dir, state) {
-        keys[dir] = state;
-        if (dir === 'up' && state && gameState === 'PLAYING') player.jump();
-    }
-</script>
+    </script>
 </body>
 </html>
