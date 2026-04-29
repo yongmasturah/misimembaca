@@ -3,19 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Misi Penyelamat Rimba: Sang Kancil Bijak</title>
+    <title>Larian Angkasa: Misi Diftong & Digraf</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
             margin: 0;
             overflow: hidden;
-            background: #1a2e1a;
+            background: #0a0a12;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             touch-action: none;
         }
         canvas {
             display: block;
-            background: linear-gradient(to bottom, #87CEEB 0%, #228B22 100%);
         }
         #game-ui {
             position: absolute;
@@ -28,7 +27,7 @@
         }
         .overlay {
             pointer-events: auto;
-            background: rgba(0, 0, 0, 0.85);
+            background: rgba(0, 0, 0, 0.9);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -39,66 +38,26 @@
         }
         .hidden { display: none !important; }
         .heart {
-            font-size: 2.5rem;
-            filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.5));
+            font-size: 2rem;
+            filter: drop-shadow(0 0 5px rgba(0, 168, 255, 0.5));
         }
-        /* Style untuk Suku Kata */
-        .syllable-slot {
-            min-width: 60px;
-            height: 60px;
-            border: 3px dashed #fbbf24;
-            background: rgba(255, 255, 255, 0.05);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border-radius: 12px;
-            margin: 0 8px;
-            padding: 0 10px;
-            color: #fbbf24;
-        }
-        .syllable-btn {
-            min-width: 60px;
-            height: 60px;
-            background: #fbbf24;
-            color: #1a2e1a;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            font-weight: bold;
-            border-radius: 12px;
-            cursor: pointer;
-            box-shadow: 0 4px 0 #b45309;
-            transition: all 0.1s;
-            margin: 0 5px;
-            padding: 0 15px;
-        }
-        .syllable-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
-        .final-word {
+        .word-display {
             font-size: 4rem;
             font-weight: 900;
             color: #fbbf24;
-            text-transform: uppercase;
-            letter-spacing: 4px;
-            text-shadow: 0 0 20px rgba(251, 191, 36, 0.5);
+            text-shadow: 0 0 20px rgba(251, 191, 36, 0.4);
             margin: 20px 0;
+            text-transform: uppercase;
+            letter-spacing: 2px;
         }
-        .control-btn {
-            pointer-events: auto;
-            width: 70px;
-            height: 70px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2rem;
-            user-select: none;
+        .btn-finish {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            box-shadow: 0 4px 15px rgba(22, 163, 74, 0.4);
+            transition: all 0.2s;
+        }
+        .btn-finish:hover {
+            transform: scale(1.05);
+            filter: brightness(1.1);
         }
     </style>
 </head>
@@ -107,61 +66,39 @@
     <div id="game-ui">
         <!-- Status Bar -->
         <div class="flex justify-between items-start p-4">
-            <div class="bg-black/50 p-2 rounded-xl border border-green-500/50">
-                <p class="text-green-400 text-[10px] uppercase font-bold tracking-widest">Jarak</p>
-                <p id="score-val" class="text-white text-xl font-mono">0m</p>
+            <div class="bg-black/50 p-2 rounded-lg border border-blue-500/50">
+                <p class="text-blue-400 text-xs uppercase font-bold tracking-widest">Skor</p>
+                <p id="score-val" class="text-white text-2xl font-mono">0</p>
             </div>
             <div class="flex gap-2" id="lives-container">
-                <!-- Hati dijana di sini -->
+                <!-- Nyawa akan dijana di sini -->
             </div>
-        </div>
-
-        <!-- Touch Controls -->
-        <div class="absolute bottom-10 left-10 flex gap-4">
-            <div class="control-btn" id="btn-left">⬅️</div>
-            <div class="control-btn" id="btn-right">➡️</div>
-        </div>
-        <div class="absolute bottom-10 right-10">
-            <div class="control-btn w-20 h-20 bg-blue-500/50" id="btn-jump">⬆️</div>
         </div>
 
         <!-- Start Screen -->
         <div id="start-screen" class="overlay absolute inset-0">
-            <div class="mb-6 animate-bounce">
-                <span class="text-8xl">🦌</span>
-            </div>
-            <h1 class="text-4xl font-black mb-2 text-green-400 italic">MISI PENYELAMAT RIMBA</h1>
-            <p class="text-gray-300 mb-8 max-w-xs">Bantu Sang Kancil merentasi hutan. Elak lubang dan labah-labah!</p>
-            <button onclick="startGame()" class="bg-green-600 hover:bg-green-500 px-10 py-4 rounded-full font-bold text-xl shadow-lg transition-all">MULA KEMBARA</button>
+            <h1 class="text-5xl font-black mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 italic">LARIAN ANGKASA</h1>
+            <p class="text-gray-300 mb-8 max-w-xs">Elak asteroid dan baca perkataan untuk teruskan misi! <br> Gunakan <b>Anak Panah</b> atau <b>Leret (Swipe)</b>.</p>
+            <button onclick="startGame()" class="bg-blue-600 hover:bg-blue-500 px-10 py-4 rounded-full font-bold text-xl shadow-lg shadow-blue-900/50 transition-all">MULA MISI</button>
         </div>
 
-        <!-- Peti Ajaib (Recovery Screen) -->
-        <div id="recovery-screen" class="overlay absolute inset-0 hidden">
-            <div class="bg-amber-900 border-4 border-amber-500 p-6 md:p-10 rounded-[2rem] max-w-2xl w-full shadow-2xl">
+        <!-- Reading Screen -->
+        <div id="refuel-screen" class="overlay absolute inset-0 hidden">
+            <div class="bg-gray-900 border-2 border-green-500 p-8 rounded-3xl max-w-md w-full shadow-2xl">
                 <div class="mb-4">
-                    <span class="text-6xl">🎁</span>
+                    <span class="text-5xl">📖</span>
                 </div>
-                <h2 class="text-2xl font-black text-amber-400 uppercase tracking-widest mb-1">PETI AJAIB</h2>
-                <p id="instruction-text" class="text-gray-300 text-sm mb-6">Susun suku kata dengan betul untuk dapatkan nyawa!</p>
+                <h2 class="text-xl font-bold mb-2 text-green-400 uppercase tracking-widest">Sila Baca Perkataan Ini:</h2>
                 
-                <!-- Syllable Slots -->
-                <div id="syllable-slots" class="flex justify-center mb-8 flex-wrap gap-y-4"></div>
-                
-                <!-- Scrambled Syllable Options -->
-                <div id="syllable-options" class="flex justify-center gap-3 mb-8 flex-wrap"></div>
-
-                <!-- Final Word Display (Hidden initially) -->
-                <div id="final-word-display" class="hidden final-word animate-bounce"></div>
-
-                <div id="feedback" class="h-8 text-lg font-bold mb-6"></div>
-
-                <div class="flex flex-col gap-3">
-                    <button id="btn-finish-reading" onclick="finishReading()" class="hidden bg-green-600 hover:bg-green-500 px-8 py-4 rounded-xl font-black text-xl shadow-lg transition-all">
-                        SELESAI MEMBACA & SAMBUNG
-                    </button>
-                    
-                    <button id="btn-reset" onclick="resetRecovery()" class="text-amber-500 text-xs underline uppercase tracking-widest">Padam & Cuba Lagi</button>
+                <div id="target-word" class="word-display">
+                    PANDAI
                 </div>
+                
+                <p class="text-gray-400 mb-8 italic">Baca dengan kuat untuk mengisi semula perisai roket!</p>
+
+                <button onclick="completeReading()" class="btn-finish w-full py-5 rounded-2xl text-xl font-black text-white uppercase tracking-widest">
+                    SELESAI MEMBACA
+                </button>
             </div>
         </div>
     </div>
@@ -169,318 +106,311 @@
     <canvas id="gameCanvas"></canvas>
 
     <script>
-        const wordsData = [
-            { word: "tupai", syllables: ["tu", "pai"] },
-            { word: "pantai", syllables: ["pan", "tai"] },
-            { word: "aurat", syllables: ["au", "rat"] },
-            { word: "kerbau", syllables: ["ker", "bau"] },
-            { word: "kaloi", syllables: ["ka", "loi"] },
-            { word: "amboi", syllables: ["am", "boi"] },
-            { word: "yang", syllables: ["yang"] },
-            { word: "bunga", syllables: ["bu", "nga"] },
-            { word: "khabar", syllables: ["kha", "bar"] },
-            { word: "khemah", syllables: ["khe", "mah"] },
-            { word: "syukur", syllables: ["syu", "kur"] },
-            { word: "nasyid", syllables: ["na", "syid"] },
-            { word: "penyu", syllables: ["pe", "nyu"] },
-            { word: "minyak", syllables: ["mi", "nyak"] },
-            { word: "daun", syllables: ["da", "un"] },
-            { word: "kain", syllables: ["ka", "in"] },
-            { word: "piano", syllables: ["pi", "a", "no"] },
-            { word: "radio", syllables: ["ra", "di", "o"] },
-            { word: "saat", syllables: ["sa", "at"] }
-        ];
-
+        // --- SISTEM BUNYI (Audio Engine) ---
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function playNote(freq, type, dur, vol=0.1) {
+        let bgmInterval = null;
+
+        function playSound(freq, type, duration, volume = 0.1) {
             const osc = audioCtx.createOscillator();
             const gain = audioCtx.createGain();
             osc.type = type;
             osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
-            gain.gain.setValueAtTime(vol, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + dur);
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.start(); osc.stop(audioCtx.currentTime + dur);
+            gain.gain.setValueAtTime(volume, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
         }
 
+        // Kesan bunyi pelanggaran (thud)
+        function playHitSound() {
+            playSound(150, 'sawtooth', 0.5, 0.2);
+            playSound(100, 'sine', 0.3, 0.3);
+        }
+
+        // Kesan bunyi perkataan muncul (chime)
+        function playWordPopSound() {
+            playSound(523.25, 'sine', 0.5, 0.2); // C5
+            setTimeout(() => playSound(659.25, 'sine', 0.5, 0.2), 100); // E5
+        }
+
+        // Kesan bunyi selesai membaca (success)
+        function playSuccessSound() {
+            playSound(523.25, 'triangle', 0.3, 0.2);
+            setTimeout(() => playSound(659.25, 'triangle', 0.3, 0.2), 100);
+            setTimeout(() => playSound(783.99, 'triangle', 0.5, 0.2), 200);
+        }
+
+        // Muzik latar ringkas
+        function startBGM() {
+            if (bgmInterval) return;
+            const playNote = () => {
+                if (gameState !== 'PLAYING') return;
+                playSound(110, 'sine', 0.4, 0.05); // Bass pulse
+                setTimeout(() => {
+                    if (gameState === 'PLAYING') playSound(220, 'sine', 0.2, 0.03);
+                }, 400);
+            };
+            playNote();
+            bgmInterval = setInterval(playNote, 800);
+        }
+
+        function stopBGM() {
+            clearInterval(bgmInterval);
+            bgmInterval = null;
+        }
+
+        // --- LOGIK PERMAINAN ---
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
-        const scoreDisplay = document.getElementById('score-val');
+        const scoreVal = document.getElementById('score-val');
         const livesContainer = document.getElementById('lives-container');
-        const recoveryScreen = document.getElementById('recovery-screen');
-        const syllableSlots = document.getElementById('syllable-slots');
-        const syllableOptions = document.getElementById('syllable-options');
-        const feedback = document.getElementById('feedback');
-        const btnFinish = document.getElementById('btn-finish-reading');
-        const finalWordDisplay = document.getElementById('final-word-display');
-        const instructionText = document.getElementById('instruction-text');
-        const btnReset = document.getElementById('btn-reset');
+        const refuelScreen = document.getElementById('refuel-screen');
+        const targetWordDisplay = document.getElementById('target-word');
 
+        const masterWordsList = [
+            "tupai", "pantai", "aurat", "kerbau", "kaloi", "amboi", 
+            "yang", "bunga", "khabar", "khemah", "syukur", "nasyid", 
+            "penyu", "minyak", "daun", "kain", "piano", "radio", "saat"
+        ];
+
+        let wordsPool = [];
         let gameState = 'START';
         let score = 0;
         let lives = 2;
-        let worldX = 0;
+        let player = { x: 0, y: 0, lane: 1, width: 60, height: 80, targetX: 0 };
+        let obstacles = [];
+        let stars = [];
         let lastTime = 0;
-        let player = { x: 100, y: 0, w: 50, h: 50, vy: 0, speed: 5, jumpForce: -15, grounded: false };
-        let platforms = [];
-        let enemies = [];
-        let selectedWordObj = null;
-        let currentGuess = [];
-
-        const keys = { left: false, right: false, up: false };
-        window.addEventListener('keydown', e => {
-            if (e.key === 'ArrowLeft') keys.left = true;
-            if (e.key === 'ArrowRight') keys.right = true;
-            if (e.key === 'ArrowUp' || e.key === ' ') keys.up = true;
-        });
-        window.addEventListener('keyup', e => {
-            if (e.key === 'ArrowLeft') keys.left = false;
-            if (e.key === 'ArrowRight') keys.right = false;
-            if (e.key === 'ArrowUp' || e.key === ' ') keys.up = false;
-        });
-
-        const bindTouch = (id, key) => {
-            const btn = document.getElementById(id);
-            btn.addEventListener('touchstart', (e) => { e.preventDefault(); keys[key] = true; });
-            btn.addEventListener('touchend', (e) => { e.preventDefault(); keys[key] = false; });
-        };
-        bindTouch('btn-left', 'left');
-        bindTouch('btn-right', 'right');
-        bindTouch('btn-jump', 'up');
+        let obstacleTimer = 0;
+        let gameSpeed = 5;
 
         function resize() {
             canvas.width = window.innerWidth;
             canvas.height = window.innerHeight;
-            if (gameState === 'START') initLevel();
+            player.y = canvas.height - 120;
+            updatePlayerX();
         }
+
         window.addEventListener('resize', resize);
         resize();
 
-        function initLevel() {
-            platforms = [{ x: 0, y: canvas.height - 100, w: 800, h: 100 }];
-            enemies = [];
-            worldX = 0;
-            player.x = 100;
-            player.y = canvas.height - 200;
-            player.vy = 0;
-            for(let i=0; i<10; i++) addPlatform();
+        for(let i=0; i<100; i++) {
+            stars.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                size: Math.random() * 2,
+                speed: Math.random() * 2 + 1
+            });
         }
 
-        function addPlatform() {
-            const last = platforms[platforms.length - 1];
-            const gap = 120 + Math.random() * 80;
-            const width = 200 + Math.random() * 300;
-            const y = canvas.height - (100 + Math.random() * 150);
-            const newPlat = { x: last.x + last.w + gap, y: y, w: width, h: 400 };
-            platforms.push(newPlat);
-            if (Math.random() > 0.6) {
-                enemies.push({ x: newPlat.x + 50, y: newPlat.y - 30, w: 30, h: 30, range: width - 60, startx: newPlat.x + 50, dir: 1, speed: 2 });
+        function updatePlayerX() {
+            const laneWidth = canvas.width / 3;
+            player.targetX = (player.lane * laneWidth) + (laneWidth / 2) - (player.width / 2);
+            if (gameState === 'START') player.x = player.targetX;
+        }
+
+        window.addEventListener('keydown', (e) => {
+            if (gameState !== 'PLAYING') return;
+            if (e.key === 'ArrowLeft' && player.lane > 0) player.lane--;
+            if (e.key === 'ArrowRight' && player.lane < 2) player.lane++;
+            updatePlayerX();
+        });
+
+        let touchStartX = 0;
+        window.addEventListener('touchstart', e => touchStartX = e.touches[0].clientX);
+        window.addEventListener('touchend', e => {
+            if (gameState !== 'PLAYING') return;
+            let touchEndX = e.changedTouches[0].clientX;
+            let diff = touchEndX - touchStartX;
+            if (Math.abs(diff) > 30) {
+                if (diff < 0 && player.lane > 0) player.lane--;
+                else if (diff > 0 && player.lane < 2) player.lane++;
+                updatePlayerX();
             }
+        });
+
+        function refreshWordsPool() {
+            wordsPool = [...masterWordsList].sort(() => Math.random() - 0.5);
+        }
+
+        function getNextWord() {
+            if (wordsPool.length === 0) refreshWordsPool();
+            return wordsPool.pop();
         }
 
         function startGame() {
             if (audioCtx.state === 'suspended') audioCtx.resume();
             document.getElementById('start-screen').classList.add('hidden');
             gameState = 'PLAYING';
-            lives = 2;
             score = 0;
-            initLevel();
+            lives = 2;
+            obstacles = [];
+            gameSpeed = 5;
+            scoreVal.innerText = "0";
             updateLivesUI();
+            refreshWordsPool();
+            startBGM();
             requestAnimationFrame(gameLoop);
         }
 
         function updateLivesUI() {
             livesContainer.innerHTML = '';
             for(let i=0; i<2; i++) {
-                const h = document.createElement('span');
-                h.className = 'heart';
-                h.innerHTML = i < lives ? '❤️' : '🖤';
-                livesContainer.appendChild(h);
+                const heart = document.createElement('span');
+                heart.className = 'heart';
+                heart.innerHTML = i < lives ? '🛡️' : '🔘';
+                livesContainer.appendChild(heart);
             }
         }
 
-        function triggerRecovery() {
-            gameState = 'RECOVERY';
-            recoveryScreen.classList.remove('hidden');
-            btnFinish.classList.add('hidden');
-            finalWordDisplay.classList.add('hidden');
-            syllableSlots.classList.remove('hidden');
-            syllableOptions.classList.remove('hidden');
-            instructionText.innerText = "Susun suku kata dengan betul untuk dapatkan nyawa!";
-            btnReset.classList.remove('hidden');
-            
-            selectedWordObj = wordsData[Math.floor(Math.random() * wordsData.length)];
-            playNote(400, 'sine', 0.5);
-            resetRecovery();
+        function triggerRefuel() {
+            stopBGM();
+            gameState = 'REFUEL';
+            const word = getNextWord();
+            targetWordDisplay.innerText = word;
+            refuelScreen.classList.remove('hidden');
+            playWordPopSound();
         }
 
-        function resetRecovery() {
-            currentGuess = [];
-            feedback.innerText = "";
-            btnFinish.classList.add('hidden');
-            finalWordDisplay.classList.add('hidden');
-            syllableSlots.classList.remove('hidden');
-            syllableOptions.classList.remove('hidden');
-            renderRecoveryUI();
+        function completeReading() {
+            playSuccessSound();
+            setTimeout(() => {
+                lives = 2;
+                updateLivesUI();
+                refuelScreen.classList.add('hidden');
+                gameState = 'PLAYING';
+                obstacles = [];
+                lastTime = performance.now();
+                startBGM();
+                requestAnimationFrame(gameLoop);
+            }, 300);
         }
 
-        function renderRecoveryUI() {
-            syllableSlots.innerHTML = '';
-            selectedWordObj.syllables.forEach((_, i) => {
-                const slot = document.createElement('div');
-                slot.className = 'syllable-slot';
-                slot.innerText = currentGuess[i] || "";
-                syllableSlots.appendChild(slot);
-            });
-
-            syllableOptions.innerHTML = '';
-            const shuffled = [...selectedWordObj.syllables].sort(() => Math.random() - 0.5);
-            shuffled.forEach(syl => {
-                const btn = document.createElement('div');
-                btn.className = 'syllable-btn';
-                btn.innerText = syl;
-                btn.onclick = () => selectSyllable(syl, btn);
-                syllableOptions.appendChild(btn);
+        function createObstacle() {
+            const lane = Math.floor(Math.random() * 3);
+            const laneWidth = canvas.width / 3;
+            obstacles.push({
+                x: (lane * laneWidth) + (laneWidth/2) - 30,
+                y: -100,
+                width: 60,
+                height: 60
             });
         }
 
-        function selectSyllable(syl, btn) {
-            if (currentGuess.length < selectedWordObj.syllables.length) {
-                currentGuess.push(syl);
-                btn.style.visibility = 'hidden';
-                playNote(600 + (currentGuess.length * 50), 'triangle', 0.1);
-                
-                const slots = syllableSlots.children;
-                slots[currentGuess.length - 1].innerText = syl;
+        function drawRocket(x, y) {
+            ctx.shadowBlur = 15;
+            ctx.shadowColor = 'rgba(0, 168, 255, 0.5)';
+            ctx.fillStyle = '#f1f2f6';
+            ctx.beginPath();
+            ctx.moveTo(x + 30, y);
+            ctx.lineTo(x + 60, y + 60);
+            ctx.lineTo(x + 50, y + 80);
+            ctx.lineTo(x + 10, y + 80);
+            ctx.lineTo(x, y + 60);
+            ctx.closePath();
+            ctx.fill();
 
-                if (currentGuess.length === selectedWordObj.syllables.length) {
-                    checkAnswer();
-                }
+            ctx.fillStyle = '#2f3542';
+            ctx.beginPath();
+            ctx.arc(x + 30, y + 40, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            if (gameState === 'PLAYING') {
+                ctx.fillStyle = Math.random() > 0.5 ? '#ff4757' : '#ffa502';
+                ctx.beginPath();
+                ctx.moveTo(x + 20, y + 80);
+                ctx.lineTo(x + 30, y + 105 + Math.random() * 10);
+                ctx.lineTo(x + 40, y + 80);
+                ctx.fill();
             }
+
+            if (lives > 0) {
+                ctx.strokeStyle = `rgba(0, 168, 255, ${0.4 + Math.sin(Date.now()/150)*0.2})`;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.arc(x + 30, y + 40, 55, 0, Math.PI * 2);
+                ctx.stroke();
+            }
+            ctx.shadowBlur = 0;
         }
 
-        function checkAnswer() {
-            const isCorrect = currentGuess.every((val, index) => val === selectedWordObj.syllables[index]);
-            
-            if (isCorrect) {
-                playNote(800, 'sine', 0.5);
-                
-                // Sembunyikan slot susunan & pilihan
-                syllableSlots.classList.add('hidden');
-                syllableOptions.classList.add('hidden');
-                btnReset.classList.add('hidden');
-                
-                // Tunjukkan perkataan penuh
-                finalWordDisplay.innerText = selectedWordObj.word;
-                finalWordDisplay.classList.remove('hidden');
-                
-                instructionText.innerText = "Sila baca perkataan ini:";
-                feedback.innerText = "HEBAT! Mari sambung larian.";
-                feedback.className = "h-8 text-lg font-bold mb-6 text-green-400";
-                
-                btnFinish.classList.remove('hidden');
-            } else {
-                feedback.innerText = "SALAH! Cuba susun semula.";
-                feedback.className = "h-8 text-lg font-bold mb-6 text-red-400";
-                playNote(200, 'sawtooth', 0.3);
-                setTimeout(resetRecovery, 1200);
-            }
-        }
-
-        function finishReading() {
-            playNote(1000, 'sine', 0.3);
-            recoveryScreen.classList.add('hidden');
-            lives = 2;
-            updateLivesUI();
-            initLevel(); 
-            gameState = 'PLAYING';
-            requestAnimationFrame(gameLoop);
+        function drawAsteroid(x, y) {
+            ctx.fillStyle = '#4b5563';
+            ctx.beginPath();
+            ctx.moveTo(x + 10, y);
+            ctx.lineTo(x + 50, y + 5);
+            ctx.lineTo(x + 60, y + 30);
+            ctx.lineTo(x + 45, y + 55);
+            ctx.lineTo(x + 15, y + 60);
+            ctx.lineTo(x, y + 35);
+            ctx.closePath();
+            ctx.fill();
+            ctx.fillStyle = '#1f2937';
+            ctx.beginPath();
+            ctx.arc(x+20, y+20, 6, 0, Math.PI*2);
+            ctx.fill();
         }
 
         function gameLoop(timestamp) {
             if (gameState !== 'PLAYING') return;
-            const dt = timestamp - lastTime;
+
+            const deltaTime = timestamp - lastTime;
             lastTime = timestamp;
 
-            if (keys.left) player.x -= player.speed;
-            if (keys.right) player.x += player.speed;
-            player.vy += 0.8; 
-            player.y += player.vy;
-            player.grounded = false;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            platforms.forEach(p => {
-                if (player.x + player.w > p.x && player.x < p.x + p.w &&
-                    player.y + player.h > p.y && player.y + player.h < p.y + p.h + player.vy) {
-                    if (player.vy > 0) { player.grounded = true; player.vy = 0; player.y = p.y - player.h; }
-                }
+            ctx.fillStyle = 'white';
+            stars.forEach(star => {
+                ctx.beginPath();
+                ctx.arc(star.x, star.y, star.size, 0, Math.PI * 2);
+                ctx.fill();
+                star.y += star.speed;
+                if (star.y > canvas.height) star.y = 0;
             });
 
-            if (player.grounded && keys.up) {
-                player.vy = player.jumpForce;
-                playNote(300, 'square', 0.1, 0.05);
+            player.x += (player.targetX - player.x) * 0.15;
+
+            obstacleTimer += deltaTime;
+            if (obstacleTimer > (1400 / (gameSpeed/5))) {
+                createObstacle();
+                obstacleTimer = 0;
             }
 
-            if (player.x > worldX + canvas.width / 2) worldX = player.x - canvas.width / 2;
-            if (player.y > canvas.height) handleDeath();
+            for (let i = obstacles.length - 1; i >= 0; i--) {
+                let obs = obstacles[i];
+                obs.y += gameSpeed;
+                drawAsteroid(obs.x, obs.y);
 
-            enemies.forEach(e => {
-                e.x += e.dir * e.speed;
-                if (e.x > e.startx + e.range || e.x < e.startx) e.dir *= -1;
-                if (player.x < e.x + e.w && player.x + player.w > e.x && player.y < e.y + e.h && player.y + player.h > e.y) handleDeath();
-            });
+                if (
+                    player.x < obs.x + 50 &&
+                    player.x + player.width > obs.x + 10 &&
+                    player.y < obs.y + 50 &&
+                    player.y + player.height > obs.y + 10
+                ) {
+                    obstacles.splice(i, 1);
+                    lives--;
+                    updateLivesUI();
+                    playHitSound(); // MAIN BUNYI PELANGGARAN
+                    if (lives <= 0) {
+                        triggerRefuel();
+                        return;
+                    }
+                    continue;
+                }
 
-            if (platforms[platforms.length - 1].x < worldX + canvas.width + 500) addPlatform();
+                if (obs.y > canvas.height) {
+                    obstacles.splice(i, 1);
+                    score += 10;
+                    scoreVal.innerText = score;
+                    gameSpeed += 0.015;
+                }
+            }
 
-            score = Math.floor(player.x / 50);
-            scoreDisplay.innerText = score + "m";
-
-            draw();
+            drawRocket(player.x, player.y);
             requestAnimationFrame(gameLoop);
-        }
-
-        function handleDeath() {
-            lives--;
-            updateLivesUI();
-            playNote(150, 'sawtooth', 0.4);
-            if (lives <= 0) triggerRecovery();
-            else { player.y = canvas.height - 400; player.vy = 0; player.x = worldX + 100; }
-        }
-
-        function draw() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            ctx.save();
-            ctx.translate(-worldX, 0);
-
-            ctx.fillStyle = '#5d4037';
-            platforms.forEach(p => {
-                ctx.fillRect(p.x, p.y, p.w, p.h);
-                ctx.fillStyle = '#2e7d32';
-                ctx.fillRect(p.x, p.y, p.w, 15);
-                ctx.fillStyle = '#5d4037';
-            });
-
-            ctx.fillStyle = '#000';
-            enemies.forEach(e => {
-                ctx.beginPath();
-                ctx.arc(e.x + e.w/2, e.y + e.h/2, e.w/2, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = 'red';
-                ctx.fillRect(e.x + 5, e.y + 10, 4, 4);
-                ctx.fillRect(e.x + 20, e.y + 10, 4, 4);
-                ctx.fillStyle = '#000';
-            });
-
-            ctx.save();
-            ctx.translate(player.x + player.w / 2, player.y + player.h / 2);
-            ctx.scale(-1, 1);
-            ctx.font = '50px serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('🦌', 0, 0);
-            ctx.restore();
-
-            ctx.restore();
         }
     </script>
 </body>
-</html>
+</html> 
